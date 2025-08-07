@@ -1,18 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Contact Form</title>
+  <meta charset="UTF-8">
+  <title>Contact Form + Sheet Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f4f8;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #007BFF;
+      color: white;
+    }
+  </style>
 </head>
 <body>
+  <h2>📋 กรอกข้อมูลเพื่อส่งไปยัง Google Sheet</h2>
   <form id="contactForm">
-    <input type="text" name="name" placeholder="Name" required><br>
-    <input type="email" name="email" placeholder="Email" required><br>
-    <textarea name="message" placeholder="Message" required></textarea><br>
-    <button type="submit">Send</button>
+    <input type="text" name="name" placeholder="ชื่อ" required>
+    <input type="email" name="email" placeholder="อีเมล" required>
+    <textarea name="message" placeholder="ข้อความ" required></textarea>
+    <button type="submit">ส่งข้อมูล</button>
   </form>
+
+  <h2>📊 ข้อมูลจาก Google Sheet</h2>
+  <table id="sheetTable">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
 
   <script>
     const form = document.getElementById("contactForm");
+    const sheetURL = "https://script.google.com/macros/s/AKfycbyXCr2LvwJvAyT6jwrgCZqbu3PH2jbcdxEWwddmI-QqW2CY_7sJiAYhsuPbrNtLuVrP/exec"; // <-- เปลี่ยน URL
+
     form.addEventListener("submit", e => {
       e.preventDefault();
       const formData = new FormData(form);
@@ -22,7 +94,7 @@
         message: formData.get("message")
       };
 
-      fetch("https://script.google.com/macros/s/AKfycbyXCr2LvwJvAyT6jwrgCZqbu3PH2jbcdxEWwddmI-QqW2CY_7sJiAYhsuPbrNtLuVrP/exec", {
+      fetch(sheetURL, {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
@@ -30,9 +102,48 @@
         }
       })
       .then(res => res.text())
-      .then(res => alert(res));
+      .then(res => {
+        alert("✅ ส่งข้อมูลสำเร็จ");
+        form.reset();
+        loadData(); // โหลดข้อมูลใหม่
+      });
     });
+
+    function loadData() {
+      fetch(sheetURL)
+        .then(response => response.json())
+        .then(data => {
+          const tableHead = document.querySelector("#sheetTable thead");
+          const tableBody = document.querySelector("#sheetTable tbody");
+          tableHead.innerHTML = "";
+          tableBody.innerHTML = "";
+
+          if (data.length > 0) {
+            const headers = Object.keys(data[0]);
+            const headRow = document.createElement("tr");
+            headers.forEach(header => {
+              const th = document.createElement("th");
+              th.textContent = header;
+              headRow.appendChild(th);
+            });
+            tableHead.appendChild(headRow);
+
+            data.forEach(row => {
+              const tr = document.createElement("tr");
+              headers.forEach(header => {
+                const td = document.createElement("td");
+                td.textContent = row[header];
+                tr.appendChild(td);
+              });
+              tableBody.appendChild(tr);
+            });
+          }
+        })
+        .catch(err => console.error("โหลดข้อมูลล้มเหลว", err));
+    }
+
+    // โหลดข้อมูลทันทีเมื่อเปิดเว็บ
+    loadData();
   </script>
 </body>
 </html>
-
