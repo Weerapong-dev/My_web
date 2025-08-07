@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Web + Google Sheet</title>
+  <title>Contact Form</title>
 </head>
 <body>
-  <h1>ข้อมูลจาก Google Sheet</h1>
-  <ul id="sheet-data"></ul>
+  <form id="contactForm">
+    <input type="text" name="name" placeholder="Name" required><br>
+    <input type="email" name="email" placeholder="Email" required><br>
+    <textarea name="message" placeholder="Message" required></textarea><br>
+    <button type="submit">Send</button>
+  </form>
 
   <script>
-    fetch('https://weerapong-dev.github.io/My_web/')
-      .then(res => res.json())
-      .then(data => {
-        const ul = document.getElementById('sheet-data');
-        data.forEach(row => {
-          const li = document.createElement('li');
-          li.textContent = row.name + ' - ' + row.email;
-          ul.appendChild(li);
-        });
-      });
+    const form = document.getElementById("contactForm");
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        message: formData.get("message")
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbxxxxxxx/exec", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(res => alert(res));
+    });
   </script>
 </body>
 </html>
-
