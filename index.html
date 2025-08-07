@@ -90,67 +90,72 @@
   <script>
     const sheetURL = "https://script.google.com/macros/s/AKfycbyXCr2LvwJvAyT6jwrgCZqbu3PH2jbcdxEWwddmI-QqW2CY_7sJiAYhsuPbrNtLuVrP/exec"; // 🔁 เปลี่ยนตรงนี้
 
-    const form = document.getElementById("contactForm");
-    const tableHead = document.querySelector("#sheetTable thead");
-    const tableBody = document.querySelector("#sheetTable tbody");
 
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const data = {
-        name: formData.get("name"),
-        email: formData.get("email"),
-        message: formData.get("message")
-      };
+  const form = document.getElementById("contactForm");
+  const tableHead = document.querySelector("#sheetTable thead");
+  const tableBody = document.querySelector("#sheetTable tbody");
 
-      fetch(sheetURL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.text())
-      .then(res => {
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message")
+    };
+
+    fetch(sheetURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.status === "success") {
         alert("✅ ส่งข้อมูลสำเร็จ");
         form.reset();
         loadData();
-      })
-      .catch(err => alert("❌ ส่งไม่สำเร็จ: " + err));
-    });
+      } else {
+        alert("❌ เกิดข้อผิดพลาด: " + res.message);
+      }
+    })
+    .catch(err => alert("❌ ส่งไม่สำเร็จ: " + err));
+  });
 
-    function loadData() {
-      fetch(sheetURL)
-        .then(res => res.json())
-        .then(data => {
-          tableHead.innerHTML = "";
-          tableBody.innerHTML = "";
+  function loadData() {
+    fetch(sheetURL)
+      .then(res => res.json())
+      .then(data => {
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
 
-          if (data.length === 0) return;
+        if (data.length === 0) return;
 
-          const headers = Object.keys(data[0]);
-          const headRow = document.createElement("tr");
-          headers.forEach(header => {
-            const th = document.createElement("th");
-            th.textContent = header;
-            headRow.appendChild(th);
-          });
-          tableHead.appendChild(headRow);
-
-          data.forEach(row => {
-            const tr = document.createElement("tr");
-            headers.forEach(header => {
-              const td = document.createElement("td");
-              td.textContent = row[header];
-              tr.appendChild(td);
-            });
-            tableBody.appendChild(tr);
-          });
+        const headers = Object.keys(data[0]);
+        const headRow = document.createElement("tr");
+        headers.forEach(header => {
+          const th = document.createElement("th");
+          th.textContent = header;
+          headRow.appendChild(th);
         });
-    }
+        tableHead.appendChild(headRow);
 
-    // โหลดข้อมูลทันที
-    loadData();
-  </script>
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          headers.forEach(header => {
+            const td = document.createElement("td");
+            td.textContent = row[header];
+            tr.appendChild(td);
+          });
+          tableBody.appendChild(tr);
+        });
+      });
+  }
+
+  loadData();
+</script>
 
 </body>
 </html>
+
 
