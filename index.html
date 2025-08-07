@@ -106,18 +106,16 @@
 
     fetch(sheetURL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      mode: "no-cors", // 👈 เพิ่มบรรทัดนี้
+      headers: {
+      "Content-Type": "application/json"
+    },
       body: JSON.stringify(data)
     })
-    .then(res => res.json())
-    .then(res => {
-      if (res.status === "success") {
-        alert("✅ ส่งข้อมูลสำเร็จ");
-        form.reset();
-        loadData();
-      } else {
-        alert("❌ เกิดข้อผิดพลาด: " + res.message);
-      }
+    .then(() => {
+      alert("✅ ส่งข้อมูลสำเร็จ");
+      form.reset();
+      loadData();
     })
     .catch(err => alert("❌ ส่งไม่สำเร็จ: " + err));
   });
@@ -157,5 +155,6 @@
 
 </body>
 </html>
+
 
 
